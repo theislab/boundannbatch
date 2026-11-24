@@ -1,6 +1,6 @@
-"""``EvalLoader`` — the deterministic, full-coverage counterpart to :class:`~scfit.data.Loader`.
+"""``EvalLoader`` — the deterministic, full-coverage counterpart to :class:`~boundannbatch.Loader`.
 
-It reuses :class:`Loader`'s :class:`~scfit.data.Stream` + :class:`~scfit.data._source.Source` machinery;
+It reuses :class:`Loader`'s :class:`~boundannbatch.Stream` + :class:`~boundannbatch._source.Source` machinery;
 only the sampler becomes an ordered leaf walk, so matching, unified sources and reps behave identically.
 """
 
@@ -10,11 +10,10 @@ from collections.abc import Callable, Iterator, Mapping
 
 import anndata as ad
 import numpy as np
-import torch
 
-from scfit.data._io import _read_rows
-from scfit.data._schema import _LEAF, _PRIMARY, _ROWS, Rep, Stream, Weights, validate_links
-from scfit.data._source import Source, build_sources, resolve_source
+from boundannbatch._io import _read_rows
+from boundannbatch._schema import _LEAF, _PRIMARY, _ROWS, Rep, Stream, Weights, validate_links
+from boundannbatch._source import Source, build_sources, resolve_source
 
 __all__ = ["EvalLoader"]
 
@@ -27,7 +26,7 @@ def _positive(weights: Weights | None) -> set[tuple] | None:
 class EvalLoader:
     """Deterministic full-coverage (or deduplicated) matched pass over grouped data.
 
-    Where :class:`~scfit.data.Loader` draws a stochastic per-batch schedule for training, this walks every
+    Where :class:`~boundannbatch.Loader` draws a stochastic per-batch schedule for training, this walks every
     primary **leaf once** in factorization order, yielding all its cells, each matched to its linked source
     by ``match_on``. Every group is covered and surfaced as ``batch["leaf"]`` — what shape inference and
     metrics want.
@@ -107,6 +106,8 @@ class EvalLoader:
         """
         arrays: dict[Rep, object] = {ref: _read_rows(src.adatas, ref, rows) for ref in reps}
         if self._to == "torch":
+            import torch
+
             arrays = {ref: torch.as_tensor(np.asarray(a)) for ref, a in arrays.items()}
         return arrays
 
@@ -114,7 +115,7 @@ class EvalLoader:
     def __iter__(self) -> Iterator[dict]:
         """Yield one batch per primary leaf: ``{"primary": {rep: rows}, <link>: {...}, "leaf": <tuple>, "rows": {...}}``.
 
-        Reps are keyed by the stream's :mod:`anndata.acc` references, as for :class:`~scfit.data.Loader`.
+        Reps are keyed by the stream's :mod:`anndata.acc` references, as for :class:`~boundannbatch.Loader`.
 
         ``rows`` maps each stream to the int64 global rows it read (its source's files concatenated in order).
         """

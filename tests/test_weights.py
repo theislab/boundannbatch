@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scfit.data._schema import weight_vector
+from boundannbatch._schema import weight_vector
 
 LEAVES = [("A", "d1"), ("A", "d2"), ("B", "d1")]
 

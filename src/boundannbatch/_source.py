@@ -1,6 +1,6 @@
 """The :class:`Source` abstraction: one dataset (a list of ``AnnData``) plus its factorization cache.
 
-A ``source_key`` in the :class:`~scfit.data.Loader`'s ``sources`` mapping resolves to one :class:`Source`,
+A ``source_key`` in the :class:`~boundannbatch.Loader`'s ``sources`` mapping resolves to one :class:`Source`,
 whose cells form one unified categorical universe.
 """
 
@@ -13,10 +13,10 @@ import anndata as ad
 import numpy as np
 import pandas as pd
 
-from scfit.data._io import get_from_container, is_backed_array, leaf_codes, materialize_node, obs_columns
+from boundannbatch._io import get_from_container, is_backed_array, leaf_codes, materialize_node, obs_columns
 
 if TYPE_CHECKING:
-    from scfit.data._schema import Container, Rep, Stream
+    from boundannbatch._schema import Container, Rep, Stream
 
 __all__ = ["Source", "build_sources", "resolve_source"]
 
@@ -62,7 +62,7 @@ class Source:
 
         Cached per ``group_by``, so several streams naming this ``source_key`` factorize it only once. Each
         grouping column is unioned to the categories seen across files (see
-        :func:`~scfit.data._io.obs_columns`), so a leaf living in only one file resolves to that file.
+        :func:`~boundannbatch._io.obs_columns`), so a leaf living in only one file resolves to that file.
         """
         gb = tuple(group_by)
         if gb not in self._leaf_cache:
@@ -96,7 +96,7 @@ class Source:
     def materialize(self, stream: Stream) -> Source:
         """A new :class:`Source` holding this stream's selected (positive-weight) cells in RAM.
 
-        Backs :attr:`~scfit.data.Stream.in_memory`. Reuses this source's factorization (no re-factorize of
+        Backs :attr:`~boundannbatch.Stream.in_memory`. Reuses this source's factorization (no re-factorize of
         the subset obs) and pre-seeds the derived subset's factorization on the returned source.
         """
         f = self.factorize(tuple(stream.group_by))
@@ -110,7 +110,7 @@ class Source:
         """Pickle without the factorization cache — the per-cell ``codes`` are large and rebuildable.
 
         Only the serialized copy drops it (the live object keeps its cache), so a checkpointed
-        :class:`~scfit.data.Loader` doesn't carry each source's ``codes`` array; :meth:`factorize`
+        :class:`~boundannbatch.Loader` doesn't carry each source's ``codes`` array; :meth:`factorize`
         recomputes on demand — which resume never needs, since it replays from the samplers.
         """
         return {**self.__dict__, "_leaf_cache": {}}

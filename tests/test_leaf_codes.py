@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from scfit.data._io import leaf_codes
+from boundannbatch._io import leaf_codes
 
 
 def _ref_leaf_codes(obs: pd.DataFrame, cols):

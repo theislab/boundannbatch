@@ -6,7 +6,7 @@ import anndata as ad
 import numpy as np
 from anndata.acc import A
 
-from scfit.data import EvalLoader, Loader, Stream
+from boundannbatch import EvalLoader, Loader, Stream
 
 
 def _adata(start: int, n: int) -> ad.AnnData:

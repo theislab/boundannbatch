@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from annbatch.samplers import ClassSampler
 
-from scfit.data._bound_sampler import BoundClassSampler
+from boundannbatch._bound_sampler import BoundClassSampler
 
 
 def _cats(labels: list[tuple], n: int) -> pd.Categorical:

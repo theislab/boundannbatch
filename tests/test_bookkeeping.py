@@ -1,6 +1,6 @@
 """Sampler bookkeeping — epoch length, the run-length rule, and non-contiguous coverage.
 
-The scfit analogs of annbatch's ``test_n_batches`` (epoch length), ``test_run_length_error_names_class_labels``
+The boundannbatch analogs of annbatch's ``test_n_batches`` (epoch length), ``test_run_length_error_names_class_labels``
 + ``test_zero_weight_class_exempt_from_run_length_rule`` (the ``chunk_size>1`` contiguous-run rule and its
 zero-weight exemption), and ``test_noncontiguous_class_samples_all_runs`` (a label split across runs is
 fully sampled). Each loader is a single primary stream (no links).
@@ -17,7 +17,7 @@ import pytest
 from anndata.acc import A
 from scheme_helpers import KEY, encoded_adata, only_leaf, rep, uniform
 
-from scfit.data import Loader, Stream
+from boundannbatch import Loader, Stream
 
 COLS = ("cell_line", "drug")
 
@@ -74,7 +74,7 @@ def test_set_n_iters_none_removes_the_pause():
 
 
 def test_chunk_run_length_error_names_the_stream():
-    # a positive-weight label with a 2-row run shorter than chunk_size(4): annbatch raises, scfit re-raises
+    # a positive-weight label with a 2-row run shorter than chunk_size(4): annbatch raises, boundannbatch re-raises
     # with the offending STREAM's name prepended (so the user knows which stream's runs are too short).
     adata = encoded_adata(("A", "B"), ("d1", "d2"), n_per_combo=2)
     weights = uniform([(cl, dr) for cl in ("A", "B") for dr in ("d1", "d2")])

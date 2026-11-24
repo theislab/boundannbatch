@@ -18,7 +18,7 @@ from annbatch import DatasetCollection
 from anndata.acc import A
 from scheme_helpers import KEY, perturbation_obs, uniform, write_zarr
 
-from scfit.data import Loader, Stream, obs_columns, open_source
+from boundannbatch import Loader, Stream, obs_columns, open_source
 
 LINES = ("A", "B")
 DRUGS = ("control", "d1", "d2")
@@ -124,7 +124,7 @@ def test_list_of_paths_source_streams(tmp_path):
 
 def test_in_memory_source_passes_through():
     # an already-constructed container is returned unchanged (not re-opened)
-    from scfit.data._io import open_source
+    from boundannbatch._io import open_source
 
     adata = _adata()
     assert open_source(adata, A.X, *(A.obs[c] for c in COLS)) is adata

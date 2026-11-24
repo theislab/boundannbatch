@@ -15,8 +15,8 @@ import pytest
 from anndata.acc import A
 from scheme_helpers import KEY, encoded_adata, perturbation_streams
 
-from scfit.data import Loader, Stream
-from scfit.data._source import Source
+from boundannbatch import Loader, Stream
+from boundannbatch._source import Source
 
 READ = {"sampler": {"batch_size": 4, "chunk_size": 1, "preload_nchunks": 4}, "to": None}
 

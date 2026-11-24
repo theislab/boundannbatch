@@ -1,8 +1,8 @@
 """Weights are really sampled — empirical label frequency tracks the configured weights.
 
-Mirrors annbatch's ``test_class_draw_shares`` at the :class:`~scfit.data.Loader` level (decode the batch,
+Mirrors annbatch's ``test_class_draw_shares`` at the :class:`~boundannbatch.Loader` level (decode the batch,
 count labels over many draws), covering uniform / explicit ratios / zero-or-absent exclusion. Plus the
-scfit-only property: a linked stream's label distribution is weight-controlled *within* the matched
+boundannbatch-only property: a linked stream's label distribution is weight-controlled *within* the matched
 context (``P(link extra cols | match_on)``). Fixed ``seed`` → reproducible, so ``atol`` is a safe band.
 """
 
@@ -15,7 +15,7 @@ import pytest
 from anndata.acc import A
 from scheme_helpers import KEY, assert_shares, encoded_adata, leaf_shares, only_leaf, rep, uniform
 
-from scfit.data import Loader, Stream
+from boundannbatch import Loader, Stream
 
 COLS = ("cell_line", "drug")
 READ = {"sampler": {"batch_size": 8, "chunk_size": 1, "preload_nchunks": 8}}

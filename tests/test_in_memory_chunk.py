@@ -2,7 +2,7 @@
 
 A materialized (in-RAM) stream gets no benefit from chunked contiguous reads and the run-length rule is
 meaningless for it. Rather than silently rewrite a ``chunk_size`` set to something else,
-:class:`~scfit.data.Loader` raises unless it is 1. Set that way, a matched control
+:class:`~boundannbatch.Loader` raises unless it is 1. Set that way, a matched control
 with short runs sits in memory fine — the case that raises annbatch's run-length error when *streamed*.
 """
 
@@ -15,7 +15,7 @@ import pytest
 from anndata.acc import A
 from scheme_helpers import LINES, perturbation_loader
 
-from scfit.data._source import Source
+from boundannbatch._source import Source
 
 COLS = ("cell_line", "drug")
 

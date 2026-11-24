@@ -11,7 +11,7 @@ import pytest
 from anndata.acc import A
 from scheme_helpers import KEY, encoded_adata, uniform
 
-from scfit.data import Loader, Stream
+from boundannbatch import Loader, Stream
 
 ADATA = encoded_adata(("A", "B"), ("d1", "d2"), 8)  # 4 groups × 8 cells (perturbed only — no control needed)
 SRC = {KEY: ADATA}  # the sources mapping every Loader case below streams from

@@ -2,7 +2,7 @@
 
 The primary draws a per-batch class schedule ∝ its weights via an annbatch
 :class:`~annbatch.samplers.ClassSampler`; every link replays that schedule onto its own cells via a
-:class:`~scfit.data._bound_sampler.BoundClassSampler`, matched on its ``match_on`` columns.
+:class:`~boundannbatch._bound_sampler.BoundClassSampler`, matched on its ``match_on`` columns.
 """
 
 from __future__ import annotations
@@ -14,13 +14,13 @@ from copy import deepcopy
 import anndata as ad
 import numpy as np
 import pandas as pd
-from annbatch import Loader as AnnbatchLoader  # annbatch's low-level per-rep loader (not scfit's `Loader`)
+from annbatch import Loader as AnnbatchLoader  # annbatch's low-level per-rep loader (not boundannbatch's `Loader`)
 from annbatch.samplers import ClassSampler
 from anndata.acc import A
 
-from scfit.data._bound_sampler import BoundClassSampler
-from scfit.data._io import is_backed_array, open_source
-from scfit.data._schema import (
+from boundannbatch._bound_sampler import BoundClassSampler
+from boundannbatch._io import is_backed_array, open_source
+from boundannbatch._schema import (
     _LEAVES,
     _PRIMARY,
     _ROWS,
@@ -30,7 +30,7 @@ from scfit.data._schema import (
     validate_links,
     weight_vector,
 )
-from scfit.data._source import Source, _Factorized, build_sources, resolve_source
+from boundannbatch._source import Source, _Factorized, build_sources, resolve_source
 
 __all__ = ["Loader"]
 
@@ -48,11 +48,11 @@ class Loader:
 
     A fresh epoch rolls each pass; :meth:`set_n_iters` only inserts a pause point, it never restarts.
     Streams address their data by ``source_key`` into ``sources``; each key resolves to one
-    :class:`~scfit.data._source.Source` owning that dataset's obs factorization, shared by every stream
+    :class:`~boundannbatch._source.Source` owning that dataset's obs factorization, shared by every stream
     naming it. :meth:`from_paths` builds that mapping from zarr or ``.h5ad`` paths.
 
     Every stream reads with ``sampler``. ``stream_samplers`` gives a named stream its own
-    :class:`~scfit.data.SamplerParams` instead; that entry replaces ``sampler`` for the stream rather than
+    :class:`~boundannbatch.SamplerParams` instead; that entry replaces ``sampler`` for the stream rather than
     merging with it, so it repeats ``batch_size`` and ``preload_nchunks``.
     """
 
@@ -182,7 +182,7 @@ class Loader:
         """Build a :class:`Loader` from ``{source_key: path | [paths]}`` (zarr opened backed, or ``.h5ad``).
 
         Each path is opened reading only the **union** of the reps and the ``group_by`` / ``match_on``
-        columns of the streams naming that ``source_key`` (via :func:`~scfit.data.open_source`) — so obs
+        columns of the streams naming that ``source_key`` (via :func:`~boundannbatch.open_source`) — so obs
         columns nobody groups on are never touched. Everything else matches :meth:`__init__`.
         """
         streams = {_PRIMARY: primary, **dict(links or {})}

@@ -16,9 +16,9 @@ import numpy as np
 import pandas as pd
 from anndata.acc import A
 
-from scfit.data import Loader, Stream
-from scfit.data._io import obs_columns
-from scfit.data._schema import Rep
+from boundannbatch import Loader, Stream
+from boundannbatch._io import obs_columns
+from boundannbatch._schema import Rep
 
 LINES = ("A", "B")
 DRUGS = ("control", "d1", "d2", "d3")
@@ -134,7 +134,7 @@ def perturbation_streams(
     """The two streams — ``primary`` (perturbed) and linked ``ctrl`` (control) — matched on ``context``.
 
     Control vs perturbed is encoded purely by which combinations carry weight (uniform over each side).
-    Returns ``(primary, {"ctrl": ...})`` — splat into :class:`~scfit.data.Loader`. ``ctrl_match_on``
+    Returns ``(primary, {"ctrl": ...})`` — splat into :class:`~boundannbatch.Loader`. ``ctrl_match_on``
     overrides the control's ``match_on`` (default = ``context``; pass ``()`` for an unconditional control).
     ``ctrl_in_memory`` materializes the control cells.
     """
@@ -168,7 +168,7 @@ def perturbation_loader(
     preload_to_gpu: bool = False,
     **stream_kwargs,
 ) -> Loader:
-    """A :class:`~scfit.data.Loader` over :func:`perturbation_streams` with the given sampler settings."""
+    """A :class:`~boundannbatch.Loader` over :func:`perturbation_streams` with the given sampler settings."""
     primary, links = perturbation_streams(source, **stream_kwargs)
     return Loader(
         {KEY: source},

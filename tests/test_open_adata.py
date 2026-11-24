@@ -7,8 +7,8 @@ import pytest
 from anndata.acc import A
 from scipy import sparse
 
-from scfit.data import open_adata, open_source
-from scfit.data._io import is_backed_array
+from boundannbatch import open_adata, open_source
+from boundannbatch._io import is_backed_array
 
 
 def dense(array) -> np.ndarray:

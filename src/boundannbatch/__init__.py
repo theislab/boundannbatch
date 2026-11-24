@@ -6,10 +6,10 @@ output by stream name, then by the stream's :mod:`anndata.acc` references (``A.X
 ``A.obsm[k]``).
 """
 
-from scfit.data._eval import EvalLoader
-from scfit.data._io import obs_columns, open_adata, open_source
-from scfit.data._loader import Loader
-from scfit.data._schema import SamplerParams, Stream
+from boundannbatch._eval import EvalLoader
+from boundannbatch._io import obs_columns, open_adata, open_source
+from boundannbatch._loader import Loader
+from boundannbatch._schema import SamplerParams, Stream
 
 __all__ = [
     "EvalLoader",

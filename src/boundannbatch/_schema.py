@@ -1,6 +1,6 @@
 """Public data spec: :class:`Stream`, :class:`SamplerParams` and the rep references they use.
 
-:class:`~scfit.data.Loader` and :class:`~scfit.data.EvalLoader` consume a :class:`Stream`, whose reps are
+:class:`~boundannbatch.Loader` and :class:`~boundannbatch.EvalLoader` consume a :class:`Stream`, whose reps are
 :mod:`anndata.acc` references (``A.X``, ``A.layers[k]``, ``A.obsm[k]``).
 """
 
@@ -46,7 +46,7 @@ def _slot(ref: Rep) -> tuple[str, str | None]:
 
 
 class SamplerParams(BaseModel):
-    """annbatch's sampler settings for one stream, passed as ``sampler=`` to :class:`~scfit.data.Loader`.
+    """annbatch's sampler settings for one stream, passed as ``sampler=`` to :class:`~boundannbatch.Loader`.
 
     A plain mapping with the same keys is accepted wherever one is.
     """
@@ -80,7 +80,7 @@ def weight_vector(weights: Weights | None, leaves: Sequence[tuple]) -> np.ndarra
 class Stream:
     r"""One streamed population: a source, its grouping columns, reps and weights.
 
-    The single public unit :class:`~scfit.data.Loader` consumes. It partitions its source's cells into
+    The single public unit :class:`~boundannbatch.Loader` consumes. It partitions its source's cells into
     **leaves** — the unique ``group_by`` combinations — and those are what gets weighted, sampled, and
     reported back per batch. A Stream passed in ``links=`` (with a ``match_on``) is matched batch-for-batch
     to the primary on the shared ``match_on`` values.
@@ -89,7 +89,7 @@ class Stream:
     ----------
     source_key
         Which dataset(s) this stream samples — a key (or a sequence of keys) into the ``sources`` mapping
-        given to :class:`~scfit.data.Loader` (``{source_key: list[AnnData]}``). Several streams may name the
+        given to :class:`~boundannbatch.Loader` (``{source_key: list[AnnData]}``). Several streams may name the
         same key (a primary and its matched control over one dataset), and the dataset's obs is factorized
         once and shared across them. Passing **several** keys unifies those datasets into one categorical
         universe (their cells concatenated), so the stream samples across all of them with a single sampler —
@@ -103,7 +103,7 @@ class Stream:
         ``A.obsm[k]`` — or a tuple of them for several **aligned** reps of the same cells. Batches are keyed by
         these references. A config string resolves with ``A.resolve("obsm.X_pca", vec=False)``. ``()`` is
         **metadata-only** — no cell matrix is read and the stream contributes only its leaf, for a prediction pass over covariate
-        combinations with no known target state (:class:`~scfit.data.EvalLoader` only).
+        combinations with no known target state (:class:`~boundannbatch.EvalLoader` only).
     weights
         ``{group: weight}`` (a group is a ``group_by`` tuple); a group absent or with weight 0 is excluded.
         :obj:`None` (default) is uniform over every group present.
@@ -162,7 +162,7 @@ class Stream:
 def validate_links(primary: Stream, links: Mapping[str, Stream]) -> None:
     """Reserved-name + ``match_on`` ⊆ shared-columns checks for a primary and its links.
 
-    Shared by :class:`~scfit.data.Loader` and :class:`~scfit.data.EvalLoader`.
+    Shared by :class:`~boundannbatch.Loader` and :class:`~boundannbatch.EvalLoader`.
     """
     clash = set(_RESERVED) & set(links)
     if clash:

@@ -18,10 +18,10 @@ import pandas as pd
 import zarr
 from anndata.acc import AdRef, LayerAcc, MetaAcc
 
-from scfit.data._schema import Container, Rep, _slot, weight_vector
+from boundannbatch._schema import Container, Rep, _slot, weight_vector
 
 if TYPE_CHECKING:
-    from scfit.data._schema import Stream
+    from boundannbatch._schema import Stream
 
 __all__ = [
     "get_from_container",
@@ -90,7 +90,7 @@ def materialize_node(
 ) -> tuple[ad.AnnData, np.ndarray, list[tuple]]:
     """Materialize a stream's selected (positive-weight) cells into an in-memory (dense) ``AnnData``.
 
-    Behind :attr:`~scfit.data.Stream.in_memory`: reads only the positive-weight rows (for each rep) and
+    Behind :attr:`~boundannbatch.Stream.in_memory`: reads only the positive-weight rows (for each rep) and
     sorts them by ``group_by`` so ``chunk_size > 1`` still reads contiguous runs. Dense and sparse (CSR
     group) alike. Cells must fit host RAM (intended for a small, frequently re-drawn population, e.g.
     matched controls).
@@ -330,7 +330,7 @@ def open_adata(
 
 
 def open_source(src, *refs, uns_keys: Sequence[str] = ()) -> Container:
-    """Resolve one :class:`~scfit.data.Stream` source value to a :data:`~scfit.data.Container`.
+    """Resolve one :class:`~boundannbatch.Stream` source value to a :data:`~boundannbatch.Container`.
 
     An in-memory ``AnnData`` or ``DatasetCollection`` passes through unchanged. A path (zarr or ``.h5ad``) is
     opened with :func:`open_adata`, reading only the parts the :mod:`anndata.acc` ``refs`` name and the

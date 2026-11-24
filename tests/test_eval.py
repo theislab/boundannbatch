@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from anndata.acc import A
 
-from scfit.data import EvalLoader, Stream
+from boundannbatch import EvalLoader, Stream
 
 CELL_LINES = ["A", "B"]
 DRUGS = ["control", "d1", "d2"]

@@ -28,8 +28,8 @@ from scheme_helpers import (
     uniform,
 )
 
-from scfit.data import Loader, Stream
-from scfit.data._source import Source
+from boundannbatch import Loader, Stream
+from boundannbatch._source import Source
 
 COLS = ("cell_line", "drug")
 
@@ -155,7 +155,7 @@ def test_per_stream_batch_sizes_differ():
 
 
 def test_materialize_node_selects_positive_weight_rows():
-    from scfit.data._io import leaf_codes, materialize_node
+    from boundannbatch._io import leaf_codes, materialize_node
 
     adata = encoded_adata(LINES, DRUGS, 16)
     _, links = perturbation_streams(adata, rep=A.X)
