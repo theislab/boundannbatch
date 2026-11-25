@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-25
+
 ### Changed
 
 - Split out of `scfit.data` (scfit 0.0.14) into its own package: `from scfit.data import Loader` is now `from boundannbatch import Loader`. Earlier history is in [scfit's changelog](https://github.com/theislab/modelbinder/blob/v0.0.14/CHANGELOG.md)
