@@ -1,7 +1,7 @@
 """Shared perturbation-test fixtures: the ``Stream``/``Loader`` builders + the tiny AnnData makers.
 
 All test-only. A perturbation dataset is the product of cell lines × drugs, with ``control`` marking the
-control drug. Importable bare (``from scheme_helpers import ...``) via the ``pythonpath = ["tests/data"]``
+control drug. Importable bare (``from scheme_helpers import ...``) via the ``pythonpath = ["tests"]``
 pytest setting.
 """
 
@@ -164,7 +164,7 @@ def perturbation_loader(
     batch_size: int = 8,
     chunk_size: int = 1,
     preload_nchunks: int = 8,
-    to: str | None = "torch",
+    to: str | None = None,
     preload_to_gpu: bool = False,
     **stream_kwargs,
 ) -> Loader:

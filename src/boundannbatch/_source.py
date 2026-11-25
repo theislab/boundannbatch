@@ -121,20 +121,16 @@ def build_sources(sources: Mapping[str, Container]) -> dict[str, Source]:
     return {k: Source(v) for k, v in dict(sources).items()}
 
 
-def resolve_source(
-    sources: dict[str, Source], stream: Stream, cache: dict[tuple[str, ...], Source] | None = None
-) -> Source:
+def resolve_source(sources: dict[str, Source], stream: Stream, cache: dict[tuple[str, ...], Source]) -> Source:
     """The Source a stream reads from: its single Source, or a unified Source over several ``source_keys``.
 
     Several keys are concatenated (in key order) into one Source — one categorical universe, one set of
-    backings — so each leaf still resolves to whichever dataset holds it. Optionally cached by key-tuple so
+    backings — so each leaf still resolves to whichever dataset holds it. Cached in ``cache`` by key-tuple so
     streams sharing the same set reuse it.
     """
     keys = stream.source_keys
     if len(keys) == 1:
         return sources[keys[0]]
-    if cache is None:
-        cache = {}
     if keys not in cache:
         cache[keys] = Source([a for k in keys for a in sources[k].adatas])
     return cache[keys]

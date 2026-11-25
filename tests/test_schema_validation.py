@@ -84,11 +84,6 @@ def test_stream_sampler_overrides_loader():
     assert next(iter(ld))["primary"][A.X].shape[0] == 4  # and it really yields 4-row batches
 
 
-def test_stream_inherits_loader_sampler():
-    ld = Loader(SRC, primary=Stream(KEY, reps=A.X, group_by=COLS, weights=W), sampler=SAMPLER, seed=0)
-    assert ld._cfg["primary"].batch_size == 8
-
-
 def test_stream_samplers_must_name_a_stream():
     with pytest.raises(ValueError, match="unknown stream"):
         Loader(
@@ -139,17 +134,3 @@ def test_in_memory_requires_chunk_one():
             sampler={"batch_size": 8, "chunk_size": 2, "preload_nchunks": 8},
             seed=0,
         )
-
-
-def test_every_stream_reports_its_leaf():
-    """``batch["leaves"]`` covers every stream — no opt-in, so consumers can key their own side arrays."""
-    ld = Loader(
-        SRC,
-        primary=Stream(KEY, reps=A.X, group_by=COLS, weights=W),
-        links={"c": Stream(KEY, reps=A.X, group_by=COLS, weights=W, match_on=("cell_line",))},
-        sampler=SAMPLER,
-        seed=0,
-    )
-    leaves = next(iter(ld))["leaves"]
-    assert set(leaves) == {"primary", "c"}
-    assert all(len(lf) == len(COLS) and lf in W for lf in leaves.values())

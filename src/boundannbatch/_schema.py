@@ -7,11 +7,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, fields
 
 import anndata as ad
 import numpy as np
 from anndata.acc import AdRef, LayerAcc, MultiAcc
-from pydantic import BaseModel, ConfigDict, PositiveInt
 
 type Container = ad.AnnData | list[ad.AnnData]
 # A whole array of an AnnData, as an :mod:`anndata.acc` reference: ``A.X``, ``A.layers[k]`` or ``A.obsm[k]``.
@@ -45,21 +45,26 @@ def _slot(ref: Rep) -> tuple[str, str | None]:
     raise ValueError(f"{ref!r} is not A.X, A.layers[k] or A.obsm[k].")
 
 
-class SamplerParams(BaseModel):
+@dataclass(frozen=True, kw_only=True)
+class SamplerParams:
     """annbatch's sampler settings for one stream, passed as ``sampler=`` to :class:`~boundannbatch.Loader`.
 
     A plain mapping with the same keys is accepted wherever one is.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    batch_size: PositiveInt
+    batch_size: int
     """Rows per emitted batch for the stream. Source and target row counts need not match."""
-    preload_nchunks: PositiveInt
+    preload_nchunks: int
     """Chunks per annbatch read window. annbatch validates the three sizes together."""
-    chunk_size: PositiveInt = 1
+    chunk_size: int = 1
     """annbatch read-slice size. ``1`` reads per row (any layout); ``>1`` reads contiguous chunks, so each
     sampled leaf must sit in a contiguous run of at least ``chunk_size``."""
+
+    def __post_init__(self) -> None:
+        for f in fields(self):
+            v = getattr(self, f.name)
+            if not isinstance(v, int) or isinstance(v, bool) or v <= 0:
+                raise ValueError(f"SamplerParams.{f.name} must be a positive int, got {v!r}.")
 
 
 def weight_vector(weights: Weights | None, leaves: Sequence[tuple]) -> np.ndarray:
@@ -150,7 +155,6 @@ class Stream:
             if any(w < 0 for w in weights.values()):
                 raise ValueError("Stream.weights must be non-negative.")
 
-        self.source_key = source_key
         self.source_keys: tuple[str, ...] = keys  # normalized; one, or several to unify over
         self.group_by = group_by
         self.reps: tuple[Rep, ...] = reps

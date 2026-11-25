@@ -48,7 +48,7 @@ class Loader:
 
     A fresh epoch rolls each pass; :meth:`set_n_iters` only inserts a pause point, it never restarts.
     Streams address their data by ``source_key`` into ``sources``; each key resolves to one
-    :class:`~boundannbatch._source.Source` owning that dataset's obs factorization, shared by every stream
+    ``Source`` owning that dataset's obs factorization, shared by every stream
     naming it. :meth:`from_paths` builds that mapping from zarr or ``.h5ad`` paths.
 
     Every stream reads with ``sampler``. ``stream_samplers`` gives a named stream its own
@@ -98,7 +98,8 @@ class Loader:
                     f"stream {name!r} has no reps: metadata-only streams are EvalLoader-only (the training "
                     "Loader streams cells). Give it a rep, or iterate it with EvalLoader."
                 )
-            eff = SamplerParams.model_validate(stream_samplers.get(name, sampler))
+            eff = stream_samplers.get(name, sampler)
+            eff = eff if isinstance(eff, SamplerParams) else SamplerParams(**eff)
             if s.in_memory and eff.chunk_size != 1:
                 raise ValueError(
                     f"stream {name!r} is in_memory but chunk_size={eff.chunk_size}: an in-memory stream is read "
@@ -183,7 +184,7 @@ class Loader:
 
         Each path is opened reading only the **union** of the reps and the ``group_by`` / ``match_on``
         columns of the streams naming that ``source_key`` (via :func:`~boundannbatch.open_source`) — so obs
-        columns nobody groups on are never touched. Everything else matches :meth:`__init__`.
+        columns nobody groups on are never touched. Everything else matches :class:`Loader`.
         """
         streams = {_PRIMARY: primary, **dict(links or {})}
         refs: dict[str, dict] = {}  # per source_key, an ordered set of references
