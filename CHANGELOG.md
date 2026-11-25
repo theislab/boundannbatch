@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning][].
 - `SamplerParams` is a frozen dataclass instead of a pydantic model; a bad value raises `ValueError`, an unknown key `TypeError`
 - `EvalLoader(subsample=...)` takes `"head"` or `"random"`; the callable form is removed
 - An annbatch `DatasetCollection` is no longer accepted as a source value (it never streamed)
-- Dependencies: `zarrs` comes through `annbatch[zarrs]`; `scipy` and `session-info2` are dropped
+- Dependencies: `zarrs` comes through `annbatch[zarrs]`; `scipy` is test-only
 
 ## [0.1.0] - 2026-11-25
 
