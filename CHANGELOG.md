@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning][].
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
 ### Changed
 
 - `SamplerParams` is a frozen dataclass instead of a pydantic model; a bad value raises `ValueError`, an unknown key `TypeError`
