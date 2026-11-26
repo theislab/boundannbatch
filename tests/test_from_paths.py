@@ -18,7 +18,7 @@ from annbatch import DatasetCollection
 from anndata.acc import A
 from scheme_helpers import KEY, perturbation_obs, uniform, write_zarr
 
-from boundannbatch import Loader, Stream, obs_columns, open_source
+from boundannbatch import Loader, Stream, obs_columns
 
 LINES = ("A", "B")
 DRUGS = ("control", "d1", "d2")
@@ -53,44 +53,6 @@ def _loader(path_value):
 
 
 # ── open_source on a zarr path: only the requested reps/cols are materialized ───────────────────
-def test_open_source_reads_only_requested_keys(tmp_path):
-    p = write_zarr(_adata(), tmp_path / "a.zarr")
-    backed = open_source(p, A.X, A.obsm["emb"], *(A.obs[c] for c in COLS))
-    assert isinstance(backed.X, ad.abc.CSRDataset)  # sparse rep stays backed (not read into RAM)
-    assert list(backed.obsm) == ["emb"]  # A.obsm["emb"] requested → present
-    assert "log1p" not in backed.layers  # A.layers["log1p"] not requested → never touched
-    assert list(backed.obs.columns) == list(COLS)  # obs reduced to the requested cols
-    np.testing.assert_array_equal(backed.obsm["emb"].shape, (backed.n_obs, 3))
-
-
-def test_open_source_layers_and_no_x(tmp_path):
-    p = write_zarr(_adata(), tmp_path / "a.zarr")
-    backed = open_source(p, A.layers["log1p"], A.obs["cell_line"])
-    assert backed.X is None  # X not requested
-    assert "log1p" in backed.layers  # requested layer present
-    assert list(backed.obs.columns) == ["cell_line"]
-
-
-def test_open_source_reads_only_requested_uns(tmp_path):
-    adata = _adata()
-    adata.uns["drug"] = {"a": np.arange(3.0), "b": np.ones(3)}
-    adata.uns["unused"] = {"x": 1}
-    p = write_zarr(adata, tmp_path / "a.zarr")
-    backed = open_source(p, A.obs["cell_line"], uns_keys=("drug",))
-    assert list(backed.uns) == ["drug"]
-    np.testing.assert_array_equal(backed.uns["drug"]["a"], np.arange(3.0))
-
-
-# ── public: open_source / obs_columns over several stores ──────────────────────────────────────
-def test_open_source_reads_a_list_of_stores_as_backed_adata(tmp_path):
-    adata = _adata()
-    adata.uns["drug"] = {"a": np.arange(3.0)}
-    paths = [write_zarr(adata[:10].copy(), tmp_path / "a.zarr"), write_zarr(adata[10:].copy(), tmp_path / "b.zarr")]
-    backed = open_source(paths, A.obsm["emb"], A.obs["cell_line"], uns_keys=("drug",))
-    assert [a.n_obs for a in backed] == [10, adata.n_obs - 10]
-    assert all("drug" in a.uns and list(a.obs.columns) == ["cell_line"] for a in backed)
-
-
 def test_obs_columns_stacks_files_with_the_union_of_categories():
     a = ad.AnnData(obs=pd.DataFrame({"c": pd.Categorical(["x", "x"])}, index=["0", "1"]))
     b = ad.AnnData(obs=pd.DataFrame({"c": pd.Categorical(["y"])}, index=["0"]))

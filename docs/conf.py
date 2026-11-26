@@ -39,7 +39,7 @@ needs_sphinx = "4.0"
 
 html_context = {
     "display_github": True,  # Integrate GitHub
-    "github_user": "selmanozleyen",
+    "github_user": "theislab",
     "github_repo": project,
     "github_version": "main",
     "conf_py_path": "/docs/",
@@ -98,7 +98,11 @@ source_suffix = {
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "anndata": ("https://anndata.scverse.org/en/stable/", None),
+    "anndata": ("https://anndata.scverse.org/en/latest/", None),
+    "annbatch": ("https://annbatch.readthedocs.io/en/latest/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "torch": ("https://docs.pytorch.org/docs/stable/", None),
+    "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
     "scanpy": ("https://scanpy.scverse.org/en/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
 }

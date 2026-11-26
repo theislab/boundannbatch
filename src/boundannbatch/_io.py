@@ -1,7 +1,6 @@
 """Container-agnostic data access for the loader: obs columns, leaf codes, and rep backings.
 
-Every helper works uniformly over an in-memory ``AnnData``, an out-of-core annbatch
-``DatasetCollection``, and reps given as :mod:`anndata.acc` references (``A.X``, ``A.layers[k]``,
+Every helper works uniformly over an ``AnnData`` (in memory or backed) or a list of them, and reps given as :mod:`anndata.acc` references (``A.X``, ``A.layers[k]``,
 ``A.obsm[k]``), so the loader never branches on the source kind. No cell matrices are touched for
 grouping — obs only.
 """
@@ -183,9 +182,7 @@ def obs_columns(source: Container, cols: Sequence[str]) -> pd.DataFrame:
         frames = [obs_columns(a, cols) for a in source]
         _align_categoricals(frames)
         return pd.concat(frames, ignore_index=True)
-    if isinstance(source, ad.AnnData):
-        return source.obs[list(cols)]
-    return source.obs(columns=list(cols))  # DatasetCollection
+    return source.obs[list(cols)]
 
 
 def _align_categoricals(frames: list[pd.DataFrame]) -> None:
@@ -299,7 +296,7 @@ def open_adata(
     ``A.obsm["pca"][:, 0]``, opens the whole array. ``A.obs[col]`` reads a column and ``A.obs.index`` the obs
     names; without it the frame gets a ``RangeIndex``. ``uns_keys`` are read into memory.
 
-    The arrays of a zarr store stay on disk, wrapped by :func:`read_backing` (a dense array passes through,
+    The arrays of a zarr store stay on disk, wrapped by ``read_backing`` (a dense array passes through,
     a sparse group becomes a ``CSRDataset``), so the loader streams them and a caller reads only the rows it
     indexes. ``var`` is reduced to its index. A ``.h5ad`` file is read the same way, but its
     arrays are loaded into memory and the file is closed: the loader streams only zarr and backed sparse
@@ -330,17 +327,15 @@ def open_adata(
 
 
 def open_source(src, *refs, uns_keys: Sequence[str] = ()) -> Container:
-    """Resolve one :class:`~boundannbatch.Stream` source value to a :data:`~boundannbatch.Container`.
+    """Resolve one :class:`~boundannbatch.Stream` source value to an ``AnnData`` or a list of them.
 
-    An in-memory ``AnnData`` or ``DatasetCollection`` passes through unchanged. A path (zarr or ``.h5ad``) is
+    An ``AnnData`` passes through unchanged. A path (zarr or ``.h5ad``) is
     opened with :func:`open_adata`, reading only the parts the :mod:`anndata.acc` ``refs`` name and the
     ``uns_keys``; a zarr annbatch collection root (``encoding-type`` ``"annbatch-preshuffled"``) is not yet
     supported. A list of paths becomes a list of AnnData (the loader feeds one backing per adata to
     ``add_datasets``).
     """
-    from annbatch import DatasetCollection
-
-    if isinstance(src, ad.AnnData | DatasetCollection):
+    if isinstance(src, ad.AnnData):
         return src
     if isinstance(src, str | os.PathLike):
         return open_adata(src, *refs, uns_keys=uns_keys)

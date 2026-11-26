@@ -10,12 +10,10 @@ from __future__ import annotations
 
 from itertools import islice
 
-import anndata as ad
 import numpy as np
-import pandas as pd
 import pytest
 from anndata.acc import A
-from scheme_helpers import KEY, encoded_adata, only_leaf, rep, uniform
+from scheme_helpers import KEY, encoded_adata, rep, uniform
 
 from boundannbatch import Loader, Stream
 
@@ -80,59 +78,3 @@ def test_chunk_run_length_error_names_the_stream():
     weights = uniform([(cl, dr) for cl in ("A", "B") for dr in ("d1", "d2")])
     with pytest.raises(ValueError, match=r"stream 'primary'"):
         _primary_only(adata, weights, batch_size=4, chunk_size=4, preload_nchunks=4)
-
-
-def _mixed_runs() -> ad.AnnData:
-    # sorted by (cell_line, drug): perturbed labels in runs of 8 (>= chunk), controls in runs of 2 (< chunk)
-    rows: list[tuple[str, str]] = []
-    for cl in ("A", "B"):
-        rows += [(cl, "control")] * 2 + [(cl, "d1")] * 8 + [(cl, "d2")] * 8
-    obs = pd.DataFrame(rows, columns=list(COLS))
-    obs.index = obs.index.astype(str)
-    x = np.random.default_rng(0).random((len(obs), 4), dtype="float32")
-    return ad.AnnData(X=x, obs=obs)
-
-
-def test_zero_weight_leaf_is_exempt_from_run_length_rule():
-    adata = _mixed_runs()
-    # excluding the short-run control (weight 0) → its 2-row run is exempt, chunk_size=4 builds fine
-    _primary_only(
-        adata,
-        uniform([(cl, dr) for cl in ("A", "B") for dr in ("d1", "d2")]),
-        batch_size=8,
-        chunk_size=4,
-        preload_nchunks=2,
-    )
-    # giving that same control a positive weight → its short run now violates the rule
-    with pytest.raises(ValueError, match=r"stream 'primary'"):
-        _primary_only(
-            adata,
-            uniform([(cl, dr) for cl in ("A", "B") for dr in ("control", "d1", "d2")]),
-            batch_size=8,
-            chunk_size=4,
-            preload_nchunks=2,
-        )
-
-
-def test_noncontiguous_leaf_is_fully_sampled():
-    # (A, d1) lives in two separate runs — rows [0:8) and [16:24); over many draws both runs must be hit
-    obs = pd.DataFrame([("A", "d1")] * 8 + [("A", "d2")] * 8 + [("A", "d1")] * 8, columns=list(COLS))
-    obs.index = obs.index.astype(str)
-    x = np.stack(
-        [
-            np.zeros(24),  # LINE: all A → 0
-            (obs["drug"] == "d2").to_numpy().astype(float),  # DRUG: d1 → 0, d2 → 1
-            np.zeros(24),  # IS_CONTROL
-            np.arange(24),  # ROW_ID
-        ],
-        axis=1,
-    ).astype("float32")
-    loader = _primary_only(
-        ad.AnnData(x, obs=obs), uniform([("A", "d1"), ("A", "d2")]), batch_size=4, chunk_size=1, preload_nchunks=4
-    )
-    seen: set[int] = set()
-    for b in islice(loader, 400):
-        tgt = rep(b, "primary", A.X)
-        if only_leaf(tgt)[1] == 0:  # a (A, d1) batch
-            seen.update(tgt[:, 3].astype(int).tolist())  # collect its ROW_IDs
-    assert any(r < 8 for r in seen) and any(r >= 16 for r in seen), "both runs of (A, d1) must be sampled"

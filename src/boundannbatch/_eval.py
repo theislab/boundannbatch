@@ -6,7 +6,7 @@ only the sampler becomes an ordered leaf walk, so matching, unified sources and 
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Iterator, Mapping
 
 import anndata as ad
 import numpy as np
@@ -39,7 +39,7 @@ class EvalLoader:
         representative per group, i.e. the unique ``group_by`` combinations (a deduplicated dataset).
     subsample
         Which ``N``: ``"head"`` (first ``N`` in row order), ``"random"`` (a ``seed``-ed, per-seed
-        reproducible draw), or a callable ``(rows, n, rng) -> rows``.
+        reproducible draw).
     """
 
     def __init__(
@@ -50,11 +50,13 @@ class EvalLoader:
         links: Mapping[str, Stream] | None = None,
         to: str | None = None,
         max_per_group: int | None = None,
-        subsample: str | Callable[[np.ndarray, int, np.random.Generator], np.ndarray] = "head",
+        subsample: str = "head",
         seed: int = 0,
     ) -> None:
         self._to = to
         self._max = max_per_group
+        if subsample not in ("head", "random"):
+            raise ValueError(f"subsample must be 'head' or 'random', got {subsample!r}.")
         self._subsample = subsample
         self._seed = seed
         self._primary = primary
@@ -91,11 +93,9 @@ class EvalLoader:
         """Subsample ``rows`` to at most ``max_per_group`` per group, per the ``subsample`` strategy."""
         if self._max is None or len(rows) <= self._max:
             return rows
-        if self._subsample == "head":
-            return rows[: self._max]
         if self._subsample == "random":
             return np.sort(rng.choice(rows, size=self._max, replace=False))
-        return self._subsample(rows, self._max, rng)  # custom callable
+        return rows[: self._max]
 
     def _read(self, src: Source, reps: tuple[Rep, ...], rows: np.ndarray) -> dict[Rep, object]:
         """Read the given global ``rows`` for each rep of a stream (optionally as torch tensors).

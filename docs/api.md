@@ -3,14 +3,13 @@
 ```{eval-rst}
 .. module:: boundannbatch
 
-.. autosummary::
-    :toctree: generated
-
-    Loader
-    EvalLoader
-    Stream
-    SamplerParams
-    open_adata
-    open_source
-    obs_columns
+.. autoclass:: Loader
+    :members:
+.. autoclass:: EvalLoader
+    :members:
+.. autoclass:: Stream
+.. autoclass:: SamplerParams
+.. autofunction:: open_adata
+.. autofunction:: open_source
+.. autofunction:: obs_columns
 ```

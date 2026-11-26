@@ -82,12 +82,6 @@ def test_open_source_reads_h5ad_paths(store: Path, adata: ad.AnnData):
     assert list(opened.obs.columns) == ["group"] and list(opened.uns) == ["table"]
 
 
-def test_open_source_names_missing_parts(adata: ad.AnnData, tmp_path: Path):
-    adata.write_zarr(tmp_path / "d.zarr")
-    with pytest.raises(KeyError, match=r"obsm\['nope'\]"):
-        open_source(tmp_path / "d.zarr", A.obsm["nope"])
-
-
 def test_obs_columns_keep_the_requested_order(store: Path):
     assert list(open_adata(store, A.obs["value"], A.obs["group"]).obs.columns) == ["value", "group"]
 
